@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from ultralytics import YOLO
 from PIL import Image
+from pydantic import BaseModel
+from langchain_ollama import OllamaLLM
 import uvicorn
 import io
 import socket
@@ -8,8 +10,13 @@ import socket
 app = FastAPI()
 model = YOLO("yolov8n.pt")
 
+chat_model = OllamaLLM(model='manlingua-ai')
+
 hostname = socket.gethostname()
 IP = socket.gethostbyname(hostname)
+
+class ChatRequest(BaseModel):
+    prompt: str
 
 @app.get('/')
 async def endpoint():
@@ -73,6 +80,13 @@ async def predict(file: UploadFile = File(...)):
     print(predictions)
 
     return {'predictions': predictions}
+
+"""AI Chat Simulation"""
+@app.post("/generate_chat")
+async def getAi(request: ChatRequest):
+    result = chat_model.invoke(request.prompt)
+    
+    return {'response': result}
 
 if __name__ == '__main__':
     uvicorn.run(app, host=IP, port=8000)
