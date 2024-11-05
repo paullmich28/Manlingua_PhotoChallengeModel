@@ -1,1 +1,0 @@
-web: gunicorn -w 4 -k uvicorn.objects.ObjectDetection model:app
